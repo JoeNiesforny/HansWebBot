@@ -73,7 +73,7 @@
     <Compile Include="WebDatabaseTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HansWebCrawler\WebCrawler.csproj">
+    <ProjectReference Include="..\WebBot\WebBot.csproj">
       <Project>{55e56e1c-2343-4c38-a32e-dde6758ff26a}</Project>
       <Name>WebCrawler</Name>
     </ProjectReference>

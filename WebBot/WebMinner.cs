@@ -17,8 +17,11 @@ namespace HansWebCrawler
         //public static List<string> BannedSite; // useless for "http://bg.pg.edu.pl"
 
         static int _WorkingThreadsCount = 0;
-        static int _MaxThread = 100;
-        static int _RequestTimeout = 200000;
+        static Mutex _WorkingThreadMutex = new Mutex();
+        static int _MaxThread = 200;
+        static int _RequestTimeout = 0;
+        static int _Dept = 1;
+        static WebDataBase _Database;
 
         public WebMinner(string address, int timeout = 200000)
         {
@@ -34,11 +37,14 @@ namespace HansWebCrawler
             var iteration = 0;
             OutputConsole = "";
             _MaxThread = threadLimit;
+            _WorkingThreadsCount = 0;
+            _Dept = dept;
+            _Database = Database;
             //BannedSite = ParseRobots.GetRobotsFile(StartAddress); // useless for "http://bg.pg.edu.pl"
-            Mining(StartAddress, -1, iteration, dept, Database);
+            Mining(StartAddress, -1, iteration);
         }
 
-        private static void Mining(string address, int parentId, int iteration, int dept, WebDataBase database)
+        private static void Mining(string address, int parentId, int iteration)
         {
             ThreadCount++;
             _WorkingThreadsCount++;
@@ -49,12 +55,12 @@ namespace HansWebCrawler
                 return;
             }
 
+            _Database.MarkAddressAsVisited(address);
             var title = GetSiteTitleFromData(data);
             var newAddresses = GetAllAddressesFromData(data, address);
-            parentId = database.AddNewRow(address, title, newAddresses, parentId);
-            database.CheckAddressAsVisited(address);
+            parentId = _Database.AddNewRow(address, title, newAddresses, parentId);
 
-            if (++iteration > dept)
+            if (++iteration > _Dept)
             {
                 _WorkingThreadsCount--;
                 return;
@@ -63,18 +69,24 @@ namespace HansWebCrawler
             var threads = new List<Thread>();
             foreach (var newAddress in newAddresses)
             {
-                if (!newAddress.Contains(StartAddress))
+                if (!newAddress.Contains(StartAddress) || newAddress.Equals(StartAddress))
                     continue;
 
                 //foreach (var site in BannedSite) // useless for "http://bg.pg.edu.pl"
                 //    if (newAddress.StartsWith(site))
                 //        continue;
 
+                _WorkingThreadMutex.WaitOne();
+                if (_Database.CheckIfAddressWasVisited(newAddress))
+                {
+                    _WorkingThreadMutex.ReleaseMutex();
+                    continue;
+                }
                 while (_WorkingThreadsCount > _MaxThread); // wait for lowering the limit
-
-                var thread = new Thread(() => Mining(newAddress, parentId, iteration, dept, database));
+                var thread = new Thread(() => Mining(newAddress, parentId, iteration));
                 thread.Start();
                 threads.Add(thread);
+                _WorkingThreadMutex.ReleaseMutex();
             }
             foreach (var thread in threads)
             {

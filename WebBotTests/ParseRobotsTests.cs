@@ -25,11 +25,11 @@ namespace HansWebCrawlerTests
         {
             List<string> disallowList = new List<string>()
             {
-                "/w/",
-                "/api/",
-                "/trap/"
+                "https://pl.wikipedia.org/w/",
+                "https://pl.wikipedia.org/api/",
+                "https://pl.wikipedia.org/trap/"
             };
-            CollectionAssert.AreEqual(disallowList, ParseRobots.GetRobotsFile("https://pl.wikipedia.org/"));
+            CollectionAssert.AreEqual(disallowList, ParseRobots.GetRobotsFile("https://pl.wikipedia.org"));
         }
 
         [TestMethod]

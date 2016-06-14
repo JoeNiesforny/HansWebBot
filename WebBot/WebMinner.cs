@@ -13,58 +13,41 @@ namespace HansWebCrawler
         public static string StartAddress;
         public static int ThreadCount = 0;
         public static int LostSiteCount = 0;
-        public static string outputConsole;
+        public static string OutputConsole;
+        //public static List<string> BannedSite; // useless for "http://bg.pg.edu.pl"
 
-        public WebMinner(string address)
+        static int _WorkingThreadsCount = 0;
+        static int _MaxThread = 100;
+        static int _RequestTimeout = 200000;
+
+        public WebMinner(string address, int timeout = 200000)
         {
             StartAddress = address;
             Database = new WebDataBase(address);
+            _RequestTimeout = timeout;
         }
 
-        // one thread action
-        public void Mining(int dept)
+        public void Mining(int dept, int threadLimit = 100)
         {
             LostSiteCount = 0;
             ThreadCount = 0;
             var iteration = 0;
-            Mining(StartAddress, -1, iteration, dept);
-        }
-        // one thread action
-        private void Mining(string address, int parentId, int iteration, int dept)
-        {
-            var data = GetDataFromSite(address);
-            if (data == "")
-                return;
-
-            var title = GetSiteTitleFromData(data);
-            var newAddresses = GetAllAddressesFromData(data, address);
-            parentId = Database.AddNewRow(address, title, newAddresses, parentId);
-
-            if (++iteration > dept)
-                return;
-
-            foreach (var newAddress in newAddresses)
-            {
-                if (!newAddress.Contains(StartAddress))
-                    continue;
-                Mining(newAddress, parentId, iteration, dept);
-            }
+            OutputConsole = "";
+            _MaxThread = threadLimit;
+            //BannedSite = ParseRobots.GetRobotsFile(StartAddress); // useless for "http://bg.pg.edu.pl"
+            Mining(StartAddress, -1, iteration, dept, Database);
         }
 
-        public void MiningMultiThread(int dept)
-        {
-            LostSiteCount = 0;
-            ThreadCount = 0;
-            var iteration = 0;
-            MiningMultiThread(StartAddress, -1, iteration, dept, Database);
-        }
-
-        private static void MiningMultiThread(string address, int parentId, int iteration, int dept, WebDataBase database)
+        private static void Mining(string address, int parentId, int iteration, int dept, WebDataBase database)
         {
             ThreadCount++;
+            _WorkingThreadsCount++;
             var data = GetDataFromSite(address);
             if (data == "")
+            {
+                _WorkingThreadsCount--;
                 return;
+            }
 
             var title = GetSiteTitleFromData(data);
             var newAddresses = GetAllAddressesFromData(data, address);
@@ -72,14 +55,24 @@ namespace HansWebCrawler
             database.CheckAddressAsVisited(address);
 
             if (++iteration > dept)
+            {
+                _WorkingThreadsCount--;
                 return;
+            }
 
             var threads = new List<Thread>();
             foreach (var newAddress in newAddresses)
             {
                 if (!newAddress.Contains(StartAddress))
                     continue;
-                var thread = new Thread(() => MiningMultiThread(newAddress, parentId, iteration, dept, database));
+
+                //foreach (var site in BannedSite) // useless for "http://bg.pg.edu.pl"
+                //    if (newAddress.StartsWith(site))
+                //        continue;
+
+                while (_WorkingThreadsCount > _MaxThread); // wait for lowering the limit
+
+                var thread = new Thread(() => Mining(newAddress, parentId, iteration, dept, database));
                 thread.Start();
                 threads.Add(thread);
             }
@@ -87,6 +80,7 @@ namespace HansWebCrawler
             {
                 thread.Join();
             }
+            _WorkingThreadsCount--;
         }
 
         private static string GetSiteTitleFromData(string data)
@@ -135,7 +129,7 @@ namespace HansWebCrawler
         private static string GetDataFromSite(string address)
         {
             var req = WebRequest.Create(address);
-            req.Timeout = 20000;
+            req.Timeout = _RequestTimeout;
             req.UseDefaultCredentials = true;
             try
             {
@@ -147,7 +141,7 @@ namespace HansWebCrawler
             catch (WebException err)
             {
                 LostSiteCount++;
-                outputConsole += "Couldn't get resposne from " + address + " with error: " + err.Message + "\r\n";
+                OutputConsole += "Couldn't get resposne from " + address + " with error: " + err.Message + "\r\n";
                 return "";
             }
         }

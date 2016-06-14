@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using HansWebCrawler;
 using System.Diagnostics;
+using System.IO;
 
 namespace WebCrawlerApp
 {
@@ -17,11 +18,13 @@ namespace WebCrawlerApp
         const string _Address = "http://bg.pg.edu.pl";
         const int _Depth = 1;
         WebMinner _Minner;
+        const int _TimeoutRequest = 100000;
+        const int _WorkingThreadLimit = 100;
 
         public WebCrawlerWindow()
         {
             InitializeComponent();
-            _Minner = new WebMinner(_Address);
+            _Minner = new WebMinner(_Address, _TimeoutRequest);
         }
 
         private void runButton_Click(object sender, EventArgs e)
@@ -29,16 +32,15 @@ namespace WebCrawlerApp
             Console.Text = "";
             _Minner.Database.ClearDatabase();
             Stopwatch stopWatch = Stopwatch.StartNew();
-            _Minner.MiningMultiThread(_Depth);
+            _Minner.Mining(_Depth, _WorkingThreadLimit);
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
-            Console.Text = WebMinner.outputConsole;
+            Console.Text = WebMinner.OutputConsole;
             Console.Text += "Finished using " + WebMinner.ThreadCount + " threads in time " + ts.Hours + ":" + ts.Minutes + ":" + ts.Seconds +
                             ":" + ts.Milliseconds + " (total " + ts.TotalMilliseconds + " ms)\r\n";
             Console.Text += "Found " + _Minner.Database.DataSet.Tables[Relation.Name].Rows.Count + " sites starting from " + _Address + "\r\n";
             Console.Text += "Looked through to " + _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " sites\r\n";
             Console.Text += "Didn't get reposne from " + WebMinner.LostSiteCount + " sites\r\n";
-            WebMinner.outputConsole = "";
 
             Console2.Text = Console.Text;
             ContentDataGrid.DataSource = _Minner.Database.DataSet.Tables[Content.Name];
@@ -55,6 +57,7 @@ namespace WebCrawlerApp
         private void button1_Click(object sender, EventArgs e)
         {
             _Minner.Database.SaveToXml();
+            File.WriteAllText("ConsoleOutput.txt", Console.Text);
         }
 
         private void countInOutButton_Click(object sender, EventArgs e)
@@ -69,6 +72,8 @@ namespace WebCrawlerApp
             RelationDataGrid.DataSource = _Minner.Database.DataSet.Tables[Relation.Name];
             ContentDataGrid2.DataSource = _Minner.Database.DataSet.Tables[Content.Name];
             RelationDataGrid2.DataSource = _Minner.Database.DataSet.Tables[Relation.Name];
+            Console.Text = File.ReadAllText("ConsoleOutput.txt");
+            Console2.Text = File.ReadAllText("ConsoleOutput.txt");
         }
     }
 }

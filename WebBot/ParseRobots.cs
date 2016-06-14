@@ -54,13 +54,18 @@ namespace HansWebCrawler
                                 data = webReader.ReadLine().ToLower();
                                 if (data.StartsWith(disallowFilter))
                                 {
-                                    disallowPlaces.Add(data.Substring(disallowFilter.Length).Trim());
+                                    var newAddress = data.Substring(disallowFilter.Length).Trim();
+                                    if (!newAddress.StartsWith(address))
+                                        newAddress = address + newAddress;
+                                    disallowPlaces.Add(newAddress);
                                 }
                                 else
+                                {
                                     if (data.StartsWith(allowFilter))
-                                    continue;
-                                else
-                                    break;
+                                        continue;
+                                    else
+                                        break;
+                                }
                             }
                     }
                 }

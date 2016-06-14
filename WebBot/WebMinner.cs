@@ -59,7 +59,7 @@ namespace HansWebCrawler
             MiningMultiThread(StartAddress, -1, iteration, dept, Database);
         }
 
-        private static void MiningMultiThread(string address, int parentId, int iteration, int dept, WebDataBase dataBase)
+        private static void MiningMultiThread(string address, int parentId, int iteration, int dept, WebDataBase database)
         {
             ThreadCount++;
             var data = GetDataFromSite(address);
@@ -68,7 +68,8 @@ namespace HansWebCrawler
 
             var title = GetSiteTitleFromData(data);
             var newAddresses = GetAllAddressesFromData(data, address);
-            parentId = dataBase.AddNewRow(address, title, newAddresses, parentId);
+            parentId = database.AddNewRow(address, title, newAddresses, parentId);
+            database.CheckAddressAsVisited(address);
 
             if (++iteration > dept)
                 return;
@@ -78,7 +79,7 @@ namespace HansWebCrawler
             {
                 if (!newAddress.Contains(StartAddress))
                     continue;
-                var thread = new Thread(() => MiningMultiThread(newAddress, parentId, iteration, dept, dataBase));
+                var thread = new Thread(() => MiningMultiThread(newAddress, parentId, iteration, dept, database));
                 thread.Start();
                 threads.Add(thread);
             }

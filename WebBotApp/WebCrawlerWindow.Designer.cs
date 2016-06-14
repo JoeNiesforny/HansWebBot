@@ -36,18 +36,20 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.tabControl2 = new System.Windows.Forms.TabControl();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.ContentDataGrid2 = new System.Windows.Forms.DataGridView();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.RelationDataGrid2 = new System.Windows.Forms.DataGridView();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.Console2 = new System.Windows.Forms.TextBox();
+            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.runButton = new System.Windows.Forms.Button();
             this.clearButton = new System.Windows.Forms.Button();
             this.saveDatabaseToXMLButton = new System.Windows.Forms.Button();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.tabControl2 = new System.Windows.Forms.TabControl();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.tabPage6 = new System.Windows.Forms.TabPage();
-            this.ContentDataGrid2 = new System.Windows.Forms.DataGridView();
-            this.RelationDataGrid2 = new System.Windows.Forms.DataGridView();
-            this.Console2 = new System.Windows.Forms.TextBox();
+            this.countInOutButton = new System.Windows.Forms.Button();
+            this.loadDatabaseFromXmlButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ContentDataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.RelationDataGrid)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -56,21 +58,23 @@
             this.tabPage3.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
-            this.flowLayoutPanel3.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.tabPage4.SuspendLayout();
-            this.tabPage5.SuspendLayout();
-            this.tabPage6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ContentDataGrid2)).BeginInit();
+            this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.RelationDataGrid2)).BeginInit();
+            this.tabPage6.SuspendLayout();
+            this.flowLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // ContentDataGrid
             // 
+            this.ContentDataGrid.AllowUserToAddRows = false;
             this.ContentDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ContentDataGrid.Location = new System.Drawing.Point(0, 0);
             this.ContentDataGrid.Name = "ContentDataGrid";
-            this.ContentDataGrid.Size = new System.Drawing.Size(603, 644);
+            this.ContentDataGrid.ReadOnly = true;
+            this.ContentDataGrid.Size = new System.Drawing.Size(610, 644);
             this.ContentDataGrid.TabIndex = 0;
             // 
             // Console
@@ -88,6 +92,7 @@
             this.RelationDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.RelationDataGrid.Location = new System.Drawing.Point(0, 0);
             this.RelationDataGrid.Name = "RelationDataGrid";
+            this.RelationDataGrid.ReadOnly = true;
             this.RelationDataGrid.Size = new System.Drawing.Size(603, 644);
             this.RelationDataGrid.TabIndex = 2;
             // 
@@ -99,7 +104,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(611, 676);
+            this.tabControl1.Size = new System.Drawing.Size(618, 676);
             this.tabControl1.TabIndex = 6;
             // 
             // tabPage1
@@ -108,7 +113,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(603, 650);
+            this.tabPage1.Size = new System.Drawing.Size(610, 650);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Main database";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -129,7 +134,7 @@
             this.tabPage3.Controls.Add(this.Console);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(603, 650);
+            this.tabPage3.Size = new System.Drawing.Size(610, 650);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Console output";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -143,55 +148,15 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(1332, 685);
             this.flowLayoutPanel1.TabIndex = 7;
             // 
-            // runButton
-            // 
-            this.runButton.Location = new System.Drawing.Point(3, 3);
-            this.runButton.Name = "runButton";
-            this.runButton.Size = new System.Drawing.Size(236, 23);
-            this.runButton.TabIndex = 8;
-            this.runButton.Text = "Run Hans";
-            this.runButton.UseVisualStyleBackColor = true;
-            this.runButton.Click += new System.EventHandler(this.runButton_Click);
-            // 
-            // clearButton
-            // 
-            this.clearButton.Location = new System.Drawing.Point(245, 3);
-            this.clearButton.Name = "clearButton";
-            this.clearButton.Size = new System.Drawing.Size(103, 23);
-            this.clearButton.TabIndex = 9;
-            this.clearButton.Text = "Clear data";
-            this.clearButton.UseVisualStyleBackColor = true;
-            this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
-            // 
-            // saveDatabaseToXMLButton
-            // 
-            this.saveDatabaseToXMLButton.Location = new System.Drawing.Point(354, 3);
-            this.saveDatabaseToXMLButton.Name = "saveDatabaseToXMLButton";
-            this.saveDatabaseToXMLButton.Size = new System.Drawing.Size(136, 23);
-            this.saveDatabaseToXMLButton.TabIndex = 10;
-            this.saveDatabaseToXMLButton.Text = "Save database to XML";
-            this.saveDatabaseToXMLButton.UseVisualStyleBackColor = true;
-            this.saveDatabaseToXMLButton.Click += new System.EventHandler(this.button1_Click);
-            // 
             // flowLayoutPanel2
             // 
             this.flowLayoutPanel2.Controls.Add(this.tabControl2);
             this.flowLayoutPanel2.Controls.Add(this.flowLayoutPanel3);
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(620, 3);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(627, 3);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(688, 672);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(701, 672);
             this.flowLayoutPanel2.TabIndex = 11;
-            // 
-            // flowLayoutPanel3
-            // 
-            this.flowLayoutPanel3.Controls.Add(this.runButton);
-            this.flowLayoutPanel3.Controls.Add(this.clearButton);
-            this.flowLayoutPanel3.Controls.Add(this.saveDatabaseToXMLButton);
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 631);
-            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(596, 34);
-            this.flowLayoutPanel3.TabIndex = 0;
             // 
             // tabControl2
             // 
@@ -215,6 +180,15 @@
             this.tabPage4.Text = "Main database";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // ContentDataGrid2
+            // 
+            this.ContentDataGrid2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ContentDataGrid2.Location = new System.Drawing.Point(-1, 0);
+            this.ContentDataGrid2.Name = "ContentDataGrid2";
+            this.ContentDataGrid2.ReadOnly = true;
+            this.ContentDataGrid2.Size = new System.Drawing.Size(678, 593);
+            this.ContentDataGrid2.TabIndex = 1;
+            // 
             // tabPage5
             // 
             this.tabPage5.Controls.Add(this.RelationDataGrid2);
@@ -225,6 +199,15 @@
             this.tabPage5.TabIndex = 1;
             this.tabPage5.Text = "Relation database";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // RelationDataGrid2
+            // 
+            this.RelationDataGrid2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.RelationDataGrid2.Location = new System.Drawing.Point(-1, 0);
+            this.RelationDataGrid2.Name = "RelationDataGrid2";
+            this.RelationDataGrid2.ReadOnly = true;
+            this.RelationDataGrid2.Size = new System.Drawing.Size(675, 593);
+            this.RelationDataGrid2.TabIndex = 1;
             // 
             // tabPage6
             // 
@@ -237,22 +220,6 @@
             this.tabPage6.Text = "Console output";
             this.tabPage6.UseVisualStyleBackColor = true;
             // 
-            // ContentDataGrid2
-            // 
-            this.ContentDataGrid2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.ContentDataGrid2.Location = new System.Drawing.Point(-1, 0);
-            this.ContentDataGrid2.Name = "ContentDataGrid2";
-            this.ContentDataGrid2.Size = new System.Drawing.Size(672, 593);
-            this.ContentDataGrid2.TabIndex = 1;
-            // 
-            // RelationDataGrid2
-            // 
-            this.RelationDataGrid2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.RelationDataGrid2.Location = new System.Drawing.Point(-1, 0);
-            this.RelationDataGrid2.Name = "RelationDataGrid2";
-            this.RelationDataGrid2.Size = new System.Drawing.Size(675, 593);
-            this.RelationDataGrid2.TabIndex = 1;
-            // 
             // Console2
             // 
             this.Console2.Location = new System.Drawing.Point(0, 0);
@@ -262,6 +229,68 @@
             this.Console2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.Console2.Size = new System.Drawing.Size(668, 590);
             this.Console2.TabIndex = 2;
+            // 
+            // flowLayoutPanel3
+            // 
+            this.flowLayoutPanel3.Controls.Add(this.runButton);
+            this.flowLayoutPanel3.Controls.Add(this.countInOutButton);
+            this.flowLayoutPanel3.Controls.Add(this.clearButton);
+            this.flowLayoutPanel3.Controls.Add(this.saveDatabaseToXMLButton);
+            this.flowLayoutPanel3.Controls.Add(this.loadDatabaseFromXmlButton);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 631);
+            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(685, 34);
+            this.flowLayoutPanel3.TabIndex = 0;
+            // 
+            // runButton
+            // 
+            this.runButton.Location = new System.Drawing.Point(3, 3);
+            this.runButton.Name = "runButton";
+            this.runButton.Size = new System.Drawing.Size(136, 23);
+            this.runButton.TabIndex = 8;
+            this.runButton.Text = "Run Hans";
+            this.runButton.UseVisualStyleBackColor = true;
+            this.runButton.Click += new System.EventHandler(this.runButton_Click);
+            // 
+            // clearButton
+            // 
+            this.clearButton.Location = new System.Drawing.Point(254, 3);
+            this.clearButton.Name = "clearButton";
+            this.clearButton.Size = new System.Drawing.Size(103, 23);
+            this.clearButton.TabIndex = 9;
+            this.clearButton.Text = "Clear data";
+            this.clearButton.UseVisualStyleBackColor = true;
+            this.clearButton.Click += new System.EventHandler(this.clearButton_Click);
+            // 
+            // saveDatabaseToXMLButton
+            // 
+            this.saveDatabaseToXMLButton.Location = new System.Drawing.Point(363, 3);
+            this.saveDatabaseToXMLButton.Name = "saveDatabaseToXMLButton";
+            this.saveDatabaseToXMLButton.Size = new System.Drawing.Size(136, 23);
+            this.saveDatabaseToXMLButton.TabIndex = 10;
+            this.saveDatabaseToXMLButton.Text = "Save database to XML";
+            this.saveDatabaseToXMLButton.UseVisualStyleBackColor = true;
+            this.saveDatabaseToXMLButton.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // countInOutButton
+            // 
+            this.countInOutButton.Location = new System.Drawing.Point(145, 3);
+            this.countInOutButton.Name = "countInOutButton";
+            this.countInOutButton.Size = new System.Drawing.Size(103, 23);
+            this.countInOutButton.TabIndex = 11;
+            this.countInOutButton.Text = "Count In/Out";
+            this.countInOutButton.UseVisualStyleBackColor = true;
+            this.countInOutButton.Click += new System.EventHandler(this.countInOutButton_Click);
+            // 
+            // loadDatabaseFromXmlButton
+            // 
+            this.loadDatabaseFromXmlButton.Location = new System.Drawing.Point(505, 3);
+            this.loadDatabaseFromXmlButton.Name = "loadDatabaseFromXmlButton";
+            this.loadDatabaseFromXmlButton.Size = new System.Drawing.Size(136, 23);
+            this.loadDatabaseFromXmlButton.TabIndex = 12;
+            this.loadDatabaseFromXmlButton.Text = "Load database from XML";
+            this.loadDatabaseFromXmlButton.UseVisualStyleBackColor = true;
+            this.loadDatabaseFromXmlButton.Click += new System.EventHandler(this.loadDatabaseFromXmlButton_Click);
             // 
             // WebCrawlerWindow
             // 
@@ -280,14 +309,14 @@
             this.tabPage3.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel2.ResumeLayout(false);
-            this.flowLayoutPanel3.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ContentDataGrid2)).EndInit();
             this.tabPage5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.RelationDataGrid2)).EndInit();
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ContentDataGrid2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RelationDataGrid2)).EndInit();
+            this.flowLayoutPanel3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -314,6 +343,8 @@
         private System.Windows.Forms.Button runButton;
         private System.Windows.Forms.DataGridView RelationDataGrid2;
         private System.Windows.Forms.TextBox Console2;
+        private System.Windows.Forms.Button countInOutButton;
+        private System.Windows.Forms.Button loadDatabaseFromXmlButton;
     }
 }
 

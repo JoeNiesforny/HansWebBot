@@ -16,10 +16,10 @@ namespace WebCrawlerApp
     public partial class WebCrawlerWindow : Form
     {
         const string _Address = "http://bg.pg.edu.pl";
-        const int _Depth = 7;
+        const int _Depth = 1;
         WebMinner _Minner;
         const int _TimeoutRequest = 1000;
-        const int _WorkingThreadLimit = 2000;
+        const int _WorkingThreadLimit = 2000; // thread limit is to support 32-bit version
 
         public WebCrawlerWindow()
         {
@@ -36,10 +36,9 @@ namespace WebCrawlerApp
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             Console.Text = WebMinner.OutputConsole;
-            Console.Text += "Finished using " + WebMinner.ThreadCount + " threads in time " + ts.Hours + ":" + ts.Minutes + ":" + ts.Seconds +
-                            ":" + ts.Milliseconds + " (total " + ts.TotalMilliseconds + " ms)\r\n";
+            Console.Text += "Finished using " + WebMinner.ThreadCount + " threads in time " + ts.ToString(@"hh\:mm\:ss\:fffffff") + "(total " + ts.TotalMilliseconds + " ms)\r\n";
             Console.Text += "Found " + _Minner.Database.DataSet.Tables[Relation.Name].Rows.Count + " sites starting from " + _Address + "\r\n";
-            Console.Text += "Looked through to " + _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " sites\r\n";
+            Console.Text += "Looked through to " + _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " sites. One page took " + ts.TotalMilliseconds/ _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " ms\r\n";
             Console.Text += "Didn't get reposne from " + WebMinner.LostSiteCount + " sites\r\n";
 
             Console2.Text = Console.Text;
@@ -52,6 +51,7 @@ namespace WebCrawlerApp
         private void clearButton_Click(object sender, EventArgs e)
         {
             _Minner.Database.ClearDatabase();
+            _Minner = new WebMinner(_Address, _TimeoutRequest);
         }
 
         private void button1_Click(object sender, EventArgs e)

@@ -24,6 +24,8 @@ namespace HansWebCrawler
         public static string ParentId = "ParentId";
         public static string Address = "Address";
         public static string Visited = "Visited";
+        public static string Title = "Title";
+        public static string Content = "Content";
     }
 
     public class WebDataBase
@@ -33,7 +35,7 @@ namespace HansWebCrawler
         DataTable _WebRelation;
         Mutex _AccessMutex;
 
-        public WebDataBase(string address) // ToDo - add what type of context should be looking for
+        public WebDataBase(string address)
         {
             _AccessMutex = new Mutex();
             var columnId = new DataColumn(Content.Id, typeof(int)) { Unique = true, AutoIncrement = true, ReadOnly = true };
@@ -49,6 +51,8 @@ namespace HansWebCrawler
             _WebRelation = new DataTable(Relation.Name);
             _WebRelation.Columns.Add(columnParentId);
             _WebRelation.Columns.Add(Relation.Address, typeof(string));
+            _WebRelation.Columns.Add(Relation.Title, typeof(string));
+            _WebRelation.Columns.Add(Relation.Content, typeof(string));
             _WebRelation.Columns.Add(Relation.Visited, typeof(bool)).DefaultValue = false;
 
             DataSet = new DataSet(address + "_" + DateTime.Now.Date.ToString());
@@ -109,6 +113,36 @@ namespace HansWebCrawler
             return id;
         }
 
+        public int AddNewRowAddressAndContent(string address, string title, List<string> addresses, int parentId = -1)
+        {
+            _AccessMutex.WaitOne();
+            var newRow = _WebContent.NewRow();
+            newRow[Content.Address] = address;
+            newRow[Content.Title] = title;
+            newRow[Content.ParentId] = parentId;
+            _WebContent.Rows.Add(newRow);
+
+            if (parentId > -1)
+            {
+                var relationNewRow = _WebRelation.NewRow();
+                relationNewRow[Relation.ParentId] = parentId;
+                relationNewRow[Relation.Address] = address;
+                _WebRelation.Rows.Add(relationNewRow);
+            }
+            var id = (int)_WebContent.Rows[_WebContent.Rows.Count - 1][Content.Id];
+
+            for (int index = 0; index < addresses.Count; index += 3)
+            {
+                var relationNewRow = _WebRelation.NewRow();
+                relationNewRow[Relation.ParentId] = id;
+                relationNewRow[Relation.Address] = addresses[index];
+                relationNewRow[Relation.Title] = addresses[index+1];
+                relationNewRow[Relation.Content] = addresses[index+2];
+                _WebRelation.Rows.Add(relationNewRow);
+            }
+            _AccessMutex.ReleaseMutex();
+            return id;
+        }
         public void SaveToXml()
         {
             DataSet.WriteXml("WebDataBase.xml");

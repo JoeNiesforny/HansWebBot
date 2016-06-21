@@ -14,14 +14,24 @@ namespace HansWebCrawler
         public static int ThreadCount = 0;
         public static int LostSiteCount = 0;
         public static string OutputConsole;
-        //public static List<string> BannedSite; // useless for "http://bg.pg.edu.pl"
+        // public static List<string> BannedSite; // useless for "http://bg.pg.edu.pl"
 
+        static List<Regex> _Filters = new List<Regex>()
+        {
+            new Regex("/documents/"),
+            new Regex("\\.pdf.*"),
+            new Regex("\\.doc.*"),
+            new Regex("\\.docx.*"),
+            new Regex("\\.ico.*"),
+            new Regex("\\.gif"),
+        };
         static int _WorkingThreadsCount = 0;
         static Mutex _WorkingThreadMutex = new Mutex();
         static int _MaxThread = 200;
         static int _RequestTimeout = 0;
         static int _Dept = 1;
         static WebDataBase _Database;
+        static List<string> TakenSite;
 
         public WebMinner(string address, int timeout = 200000)
         {
@@ -32,6 +42,7 @@ namespace HansWebCrawler
 
         public void Mining(int dept, int threadLimit = 100)
         {
+            TakenSite = new List<string>() { StartAddress };
             LostSiteCount = 0;
             ThreadCount = 0;
             var iteration = 0;
@@ -57,8 +68,8 @@ namespace HansWebCrawler
 
             _Database.MarkAddressAsVisited(address);
             var title = GetSiteTitleFromData(data);
-            var newAddresses = GetAllAddressesFromData(data, address);
-            parentId = _Database.AddNewRow(address, title, newAddresses, parentId);
+            var newAddresses = GetAllAddressesWithContentFromData(data, address);
+            parentId = _Database.AddNewRowAddressAndContent(address, title, newAddresses, parentId);
 
             if (++iteration > _Dept)
             {
@@ -69,30 +80,41 @@ namespace HansWebCrawler
             var threads = new List<Thread>();
             foreach (var newAddress in newAddresses)
             {
-                if (!newAddress.Contains(StartAddress) || newAddress.Equals(StartAddress))
+                if (!newAddress.Contains(StartAddress))
                     continue;
 
-                //foreach (var site in BannedSite) // useless for "http://bg.pg.edu.pl"
-                //    if (newAddress.StartsWith(site))
-                //        continue;
+                if (FilterSite(newAddress))
+                    continue;
 
                 _WorkingThreadMutex.WaitOne();
-                if (_Database.CheckIfAddressWasVisited(newAddress))
+                if (TakenSite.Contains(newAddress))
                 {
                     _WorkingThreadMutex.ReleaseMutex();
                     continue;
                 }
-                while (_WorkingThreadsCount > _MaxThread); // wait for lowering the limit
+                TakenSite.Add(newAddress);
+                while (_WorkingThreadsCount > _MaxThread) ; // wait for lowering the limit
                 var thread = new Thread(() => Mining(newAddress, parentId, iteration));
                 thread.Start();
-                threads.Add(thread);
                 _WorkingThreadMutex.ReleaseMutex();
+                threads.Add(thread);
             }
             foreach (var thread in threads)
             {
                 thread.Join();
             }
             _WorkingThreadsCount--;
+        }
+
+        private static bool FilterSite(string address)
+        {
+            foreach (var filter in _Filters) // filter for documents
+                if (filter.IsMatch(address))
+                    return true;
+            //foreach (var banned in BannedSite)
+            //    if (address.Contains(banned))
+            //        return true;
+            return false;
         }
 
         private static string GetSiteTitleFromData(string data)
@@ -118,13 +140,41 @@ namespace HansWebCrawler
         private static List<string> GetAllAddressesFromData(string data, string address = "")
         {
             List<string> addresses = new List<string>();
-            var match = Regex.Match(data, "<a href=\\\"([^mailto#][-A-Za-z0-9,.:;?@_~/&]*[^pdf])\\\"");
+            var match = Regex.Match(data, "<a href=\\\"([^mailto#][-A-Za-z0-9,.:;?@_~/&]*)\\\"");
             while (match.Success)
             {
                 var value = match.Groups[1].Value;
                 if (!value.StartsWith("http"))
                     value = address + value;
                 addresses.Add(value);
+                match = match.NextMatch();
+            }
+            return addresses;
+        }
+
+        private static List<string> GetAllAddressesWithContentFromData(string data, string address = "")
+        {
+            List<string> addresses = new List<string>();
+            var match = Regex.Match(data, "<a href=\"([^mailto#][-A-Za-z0-9,.:;?@_~/&]*)\".*?(/>|</a>)");
+            while (match.Success)
+            {
+                var value = match.Groups[1].Value;
+                if (!value.StartsWith("http"))
+                    value = address + value;
+                addresses.Add(value);
+
+                var match2 = Regex.Match(match.Value, "title=\"(.*?)\"");
+                if (match2.Success)
+                    addresses.Add(match2.Groups[1].Value);
+                else
+                    addresses.Add("");
+
+                match2 = Regex.Match(match.Value, ">(.*?)</a>");
+                if (match2.Success)
+                    addresses.Add(match2.Groups[1].Value);
+                else
+                    addresses.Add("");
+
                 match = match.NextMatch();
             }
             return addresses;

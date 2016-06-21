@@ -16,10 +16,10 @@ namespace WebCrawlerApp
     public partial class WebCrawlerWindow : Form
     {
         const string _Address = "http://bg.pg.edu.pl";
-        const int _Depth = 1;
+        const int _Depth = 20;
         WebMinner _Minner;
-        const int _TimeoutRequest = 1000;
-        const int _WorkingThreadLimit = 2000; // thread limit is to support 32-bit version
+        const int _TimeoutRequest = 30000;
+        const int _WorkingThreadLimit = 20000; // thread limit is to support 32-bit version
 
         public WebCrawlerWindow()
         {

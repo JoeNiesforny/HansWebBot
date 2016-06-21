@@ -14,7 +14,7 @@ namespace HansWebCrawler
         public static int ThreadCount = 0;
         public static int LostSiteCount = 0;
         public static string OutputConsole;
-        // public static List<string> BannedSite; // useless for "http://bg.pg.edu.pl"
+        // public static List<string> BannedSite; // "robot"- useless for "http://bg.pg.edu.pl"
 
         static List<Regex> _Filters = new List<Regex>()
         {
@@ -51,7 +51,7 @@ namespace HansWebCrawler
             _WorkingThreadsCount = 0;
             _Dept = dept;
             _Database = Database;
-            //BannedSite = ParseRobots.GetRobotsFile(StartAddress); // useless for "http://bg.pg.edu.pl"
+            //BannedSite = ParseRobots.GetRobotsFile(StartAddress); //"robot"- useless for "http://bg.pg.edu.pl"
             Mining(StartAddress, -1, iteration);
         }
 
@@ -111,23 +111,13 @@ namespace HansWebCrawler
             foreach (var filter in _Filters) // filter for documents
                 if (filter.IsMatch(address))
                     return true;
-            //foreach (var banned in BannedSite)
+            //foreach (var banned in BannedSite) //"robot"- useless for bg.pg.gda.pl
             //    if (address.Contains(banned))
             //        return true;
             return false;
         }
 
         private static string GetSiteTitleFromData(string data)
-        {
-            var match = Regex.Match(data, "<title>(.*)</title>");
-            if (match.Success)
-            {
-                return match.Groups[1].Value;
-            }
-            return "";
-        }
-
-        private static string GetSiteReadMeFromData(string data)
         {
             var match = Regex.Match(data, "<title>(.*)</title>");
             if (match.Success)
@@ -145,7 +135,7 @@ namespace HansWebCrawler
             {
                 var value = match.Groups[1].Value;
                 if (!value.StartsWith("http"))
-                    value = address + value;
+                    value = StartAddress + value;
                 addresses.Add(value);
                 match = match.NextMatch();
             }
@@ -160,7 +150,7 @@ namespace HansWebCrawler
             {
                 var value = match.Groups[1].Value;
                 if (!value.StartsWith("http"))
-                    value = address + value;
+                    value = StartAddress + value;
                 addresses.Add(value);
 
                 var match2 = Regex.Match(match.Value, "title=\"(.*?)\"");

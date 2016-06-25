@@ -75,5 +75,11 @@ namespace WebCrawlerApp
             Console.Text = File.ReadAllText("ConsoleOutput.txt");
             Console2.Text = File.ReadAllText("ConsoleOutput.txt");
         }
+
+        private void questionContentButton_Click(object sender, EventArgs e)
+        {
+            var rows = _Minner.Database.DataSet.Tables[Content.Name].Select(questionContentTextBox.Text);
+            ContentDataGrid.DataSource = _Minner.Database.DataSet.Tables[Content.Name].Select(questionContentTextBox.Text);
+        }
     }
 }

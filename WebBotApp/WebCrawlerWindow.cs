@@ -10,13 +10,14 @@ using System.Windows.Forms;
 using HansWebCrawler;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace WebCrawlerApp
 {
     public partial class WebCrawlerWindow : Form
     {
-        const string _Address = "http://bg.pg.edu.pl";
-        const int _Depth = 20;
+        const string _Address = "http://pg.edu.pl/";
+        const int _Depth = 3;
         WebMinner _Minner;
         const int _TimeoutRequest = 30000;
         const int _WorkingThreadLimit = 20000; // thread limit is to support 32-bit version
@@ -36,11 +37,10 @@ namespace WebCrawlerApp
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             Console.Text = WebMinner.OutputConsole;
-            Console.Text += "Finished using " + WebMinner.ThreadCount + " threads in time " + ts.ToString(@"hh\:mm\:ss\:fffffff") + "(total " + ts.TotalMilliseconds + " ms)\r\n";
+            Console.Text += "Finished using " + WebMinner.ThreadCount + " threads in time " + ts.ToString(@"hh\:mm\:ss\:fffffff") + " (total " + ts.TotalMilliseconds + " ms)\r\n";
             Console.Text += "Found " + _Minner.Database.DataSet.Tables[Relation.Name].Rows.Count + " sites starting from " + _Address + "\r\n";
-            Console.Text += "Looked through to " + _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " sites. One page took " + ts.TotalMilliseconds/ _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " ms\r\n";
+            Console.Text += "Looked through to " + _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " sites. One page took " + ts.TotalMilliseconds / _Minner.Database.DataSet.Tables[Content.Name].Rows.Count + " ms\r\n";
             Console.Text += "Didn't get reposne from " + WebMinner.LostSiteCount + " sites\r\n";
-
             Console2.Text = Console.Text;
             ContentDataGrid.DataSource = _Minner.Database.DataSet.Tables[Content.Name];
             RelationDataGrid.DataSource = _Minner.Database.DataSet.Tables[Relation.Name];
@@ -63,6 +63,23 @@ namespace WebCrawlerApp
         private void countInOutButton_Click(object sender, EventArgs e)
         {
             _Minner.Database.CountInOutFromAcquireSites();
+            var series = chart1.Series.Add("Rozkład Wejść");
+            List<int> list = new List<int>();
+            foreach (DataRow row in _Minner.Database.DataSet.Tables[Content.Name].Rows)
+                list.Add(int.Parse(row[Content.In].ToString()));
+            list.Sort();
+            foreach (var element in list)
+                series.Points.Add(element);
+            chart1.ChartAreas[0].AxisY.Title = "Ilość wejść";
+            var series2 = chart2.Series.Add("Rozkład Wyjść");
+            list = new List<int>();
+            foreach (DataRow row in _Minner.Database.DataSet.Tables[Content.Name].Rows)
+                list.Add(int.Parse(row[Content.Out].ToString()));
+            list.Sort();
+            foreach (var element in list)
+                series2.Points.Add(element);
+            series2.Color = Color.Red;
+            chart2.ChartAreas[0].AxisY.Title = "Ilość wyjść";
         }
 
         private void loadDatabaseFromXmlButton_Click(object sender, EventArgs e)

@@ -40,25 +40,21 @@ namespace HansWebCrawler
             _AccessMutex = new Mutex();
             var columnId = new DataColumn(Content.Id, typeof(int)) { Unique = true, AutoIncrement = true, ReadOnly = true };
             var columnParentId = new DataColumn(Relation.ParentId, typeof(int));
-
             _WebContent = new DataTable(Content.Name);
             _WebContent.Columns.Add(columnId);
             _WebContent.PrimaryKey = new DataColumn[] { columnId };
             _WebContent.Columns.Add(Content.ParentId, typeof(int));
             _WebContent.Columns.Add(Content.Address, typeof(string));
             _WebContent.Columns.Add(Content.Title, typeof(string));
-
             _WebRelation = new DataTable(Relation.Name);
             _WebRelation.Columns.Add(columnParentId);
             _WebRelation.Columns.Add(Relation.Address, typeof(string));
             _WebRelation.Columns.Add(Relation.Title, typeof(string));
             _WebRelation.Columns.Add(Relation.Content, typeof(string));
             _WebRelation.Columns.Add(Relation.Visited, typeof(bool)).DefaultValue = false;
-
             DataSet = new DataSet(address + "_" + DateTime.Now.Date.ToString());
             DataSet.Tables.Add(_WebRelation);
             DataSet.Tables.Add(_WebContent);
-
             var relationIdParent = new DataRelation("ParentToChild", columnId, columnParentId);
             DataSet.Relations.Add(relationIdParent);
         }
@@ -92,7 +88,6 @@ namespace HansWebCrawler
             newRow[Content.Title] = title;
             newRow[Content.ParentId] = parentId;
             _WebContent.Rows.Add(newRow);
-
             if (parentId > -1)
             {
                 var relationNewRow = _WebRelation.NewRow();
@@ -101,7 +96,6 @@ namespace HansWebCrawler
                 _WebRelation.Rows.Add(relationNewRow);
             }
             var id = (int)_WebContent.Rows[_WebContent.Rows.Count - 1][Content.Id];
-
             foreach (var childAddress in addresses)
             {
                 var relationNewRow = _WebRelation.NewRow();
@@ -121,7 +115,6 @@ namespace HansWebCrawler
             newRow[Content.Title] = title;
             newRow[Content.ParentId] = parentId;
             _WebContent.Rows.Add(newRow);
-
             if (parentId > -1)
             {
                 var relationNewRow = _WebRelation.NewRow();
@@ -130,14 +123,13 @@ namespace HansWebCrawler
                 _WebRelation.Rows.Add(relationNewRow);
             }
             var id = (int)_WebContent.Rows[_WebContent.Rows.Count - 1][Content.Id];
-
             for (int index = 0; index < addresses.Count; index += 3)
             {
                 var relationNewRow = _WebRelation.NewRow();
                 relationNewRow[Relation.ParentId] = id;
                 relationNewRow[Relation.Address] = addresses[index];
-                relationNewRow[Relation.Title] = addresses[index+1];
-                relationNewRow[Relation.Content] = addresses[index+2];
+                relationNewRow[Relation.Title] = addresses[index + 1];
+                relationNewRow[Relation.Content] = addresses[index + 2];
                 _WebRelation.Rows.Add(relationNewRow);
             }
             _AccessMutex.ReleaseMutex();
@@ -145,6 +137,8 @@ namespace HansWebCrawler
         }
         public void SaveToXml()
         {
+            DataSet.Tables[Content.Name].WriteXml("WebDataBase-Content.xml");
+            DataSet.Tables[Relation.Name].WriteXml("WebDataBase-Relation.xml");
             DataSet.WriteXml("WebDataBase.xml");
         }
 
@@ -185,16 +179,14 @@ namespace HansWebCrawler
                 return listOfChildAddresses;
             var childsRow = rows[0].GetChildRows("ParentToChild");
             foreach (var child in childsRow)
-            {
                 listOfChildAddresses.Add((string)child[Content.Address]);
-            }
             return listOfChildAddresses;
         }
 
         public void ClearDatabase()
         {
             foreach (DataTable table in DataSet.Tables)
-                 table.Clear();
+                table.Clear();
         }
 
         public void CountInOutFromAcquireSites()
@@ -202,7 +194,6 @@ namespace HansWebCrawler
             _WebContent.Columns.Add(Content.In, typeof(int));
             _WebContent.Columns.Add(Content.Out, typeof(int));
             var rows = _WebContent.Rows;
-
             foreach (DataRow row in rows)
             {
                 var id = (int)row[Content.Id];
@@ -219,9 +210,7 @@ namespace HansWebCrawler
             _AccessMutex.WaitOne();
             var rows = _WebRelation.Select(Relation.Address + " = '" + address + "'");
             foreach (DataRow row in rows)
-            {
                 row[Relation.Visited] = true;
-            }
             _AccessMutex.ReleaseMutex();
         }
 

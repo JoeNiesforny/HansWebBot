@@ -14,7 +14,7 @@ namespace HansWebCrawler
         public static int ThreadCount = 0;
         public static int LostSiteCount = 0;
         public static string OutputConsole;
-        // public static List<string> BannedSite; // "robot"- useless for "http://bg.pg.edu.pl"
+        public static List<string> BannedSite; // robots
 
         static List<Regex> _Filters = new List<Regex>()
         {
@@ -51,7 +51,7 @@ namespace HansWebCrawler
             _WorkingThreadsCount = 0;
             _Dept = dept;
             _Database = Database;
-            //BannedSite = ParseRobots.GetRobotsFile(StartAddress); //"robot"- useless for "http://bg.pg.edu.pl"
+            BannedSite = ParseRobots.GetRobotsFile(StartAddress); // robots
             Mining(StartAddress, -1, iteration);
         }
 
@@ -99,6 +99,8 @@ namespace HansWebCrawler
                 _WorkingThreadMutex.ReleaseMutex();
                 threads.Add(thread);
             }
+            SaveDataToFile(address, data);
+            data = null;
             foreach (var thread in threads)
             {
                 thread.Join();
@@ -111,9 +113,9 @@ namespace HansWebCrawler
             foreach (var filter in _Filters) // filter for documents
                 if (filter.IsMatch(address))
                     return true;
-            //foreach (var banned in BannedSite) //"robot"- useless for bg.pg.gda.pl
-            //    if (address.Contains(banned))
-            //        return true;
+            foreach (var banned in BannedSite) //robots
+                if (address.Contains(banned))
+                    return true;
             return false;
         }
 
@@ -170,14 +172,6 @@ namespace HansWebCrawler
             return addresses;
         }
 
-        private static string GetHeaderFromSite(string address)
-        {
-            var req = WebRequest.Create(address);
-            req.UseDefaultCredentials = true;
-            var webResposne = req.GetResponse();
-            return webResposne.Headers.ToString();
-        }
-
         private static string GetDataFromSite(string address)
         {
             var req = WebRequest.Create(address);
@@ -196,6 +190,13 @@ namespace HansWebCrawler
                 OutputConsole += "Couldn't get resposne from " + address + " with error: " + err.Message + "\r\n";
                 return "";
             }
+        }
+
+        private static void SaveDataToFile(string address, string data)
+        {
+            Directory.CreateDirectory(address.Substring(7));
+            // ToDo - compute data or clean it from trash and leave only text.
+            File.WriteAllLines(address.Substring(7) + "/data", new string[] { data });
         }
     }
 }

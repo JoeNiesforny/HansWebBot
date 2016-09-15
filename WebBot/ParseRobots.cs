@@ -35,36 +35,42 @@ namespace HansWebCrawler
             var userFilter = "user-agent:";
             var allowFilter = "allow:";
             var disallowFilter = "disallow:";
-
             var req = WebRequest.Create(address + "/robots.txt");
-            var webStream = req.GetResponse().GetResponseStream();
-            StreamReader webReader = new StreamReader(webStream);
-            while (!webReader.EndOfStream)
+            try
             {
-                var data = webReader.ReadLine().ToLower();
-                if (data.StartsWith(userFilter))
+                var webStream = req.GetResponse().GetResponseStream();
+                StreamReader webReader = new StreamReader(webStream);
+                while (!webReader.EndOfStream)
                 {
-                    var user = data.Substring(userFilter.Length).Trim();
-                    if (user == "*")
-                        while (!string.IsNullOrEmpty(data))
-                        {
-                            data = webReader.ReadLine().ToLower();
-                            if (data.StartsWith(disallowFilter))
+                    var data = webReader.ReadLine().ToLower();
+                    if (data.StartsWith(userFilter))
+                    {
+                        var user = data.Substring(userFilter.Length).Trim();
+                        if (user == "*")
+                            while (!string.IsNullOrEmpty(data))
                             {
-                                var newAddress = data.Substring(disallowFilter.Length).Trim();
-                                if (!newAddress.StartsWith(address))
-                                    newAddress = address + newAddress;
-                                disallowPlaces.Add(newAddress);
-                            }
-                            else
-                            {
-                                if (data.StartsWith(allowFilter))
-                                    continue;
+                                data = webReader.ReadLine().ToLower();
+                                if (data.StartsWith(disallowFilter))
+                                {
+                                    var newAddress = data.Substring(disallowFilter.Length).Trim();
+                                    if (!newAddress.StartsWith(address))
+                                        newAddress = address + newAddress;
+                                    disallowPlaces.Add(newAddress);
+                                }
                                 else
-                                    break;
+                                {
+                                    if (data.StartsWith(allowFilter))
+                                        continue;
+                                    else
+                                        break;
+                                }
                             }
-                        }
+                    }
                 }
+            }
+            catch (WebException)
+            {
+                WebMinner.OutputConsole += "There is no 'robots.txt' file attached to site.\r\n";
             }
             return disallowPlaces;
         }

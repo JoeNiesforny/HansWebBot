@@ -196,6 +196,12 @@ namespace HansWebCrawler
         {
             Directory.CreateDirectory(address.Substring(7));
             // ToDo - compute data or clean it from trash and leave only text.
+            data = Regex.Replace(data, "(<(.*?)<body (.*?)>)", "");
+            data = Regex.Replace(data, "(<script.*?</script>)", "");
+            data = Regex.Replace(data, "(<br>)", "\n");
+            data = Regex.Replace(data, "(<.*?>)", "");
+            data = data.Replace("&nbsp;", " ");
+            data = Regex.Replace(data, "( {2,})", "\n");
             File.WriteAllLines(address.Substring(7) + "/data", new string[] { data });
         }
     }

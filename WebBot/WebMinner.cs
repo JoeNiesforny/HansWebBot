@@ -19,11 +19,11 @@ namespace HansWebCrawler
         static List<Regex> _Filters = new List<Regex>()
         {
             new Regex("/documents/"),
-            new Regex("\\.pdf.*"),
-            new Regex("\\.doc.*"),
-            new Regex("\\.docx.*"),
-            new Regex("\\.ico.*"),
-            new Regex("\\.gif"),
+                new Regex("\\.pdf.*"),
+                new Regex("\\.doc.*"),
+                new Regex("\\.docx.*"),
+                new Regex("\\.ico.*"),
+                new Regex("\\.gif"),
         };
         static int _WorkingThreadsCount = 0;
         static Mutex _WorkingThreadMutex = new Mutex();
@@ -65,27 +65,22 @@ namespace HansWebCrawler
                 _WorkingThreadsCount--;
                 return;
             }
-
             _Database.MarkAddressAsVisited(address);
             var title = GetSiteTitleFromData(data);
             var newAddresses = GetAllAddressesWithContentFromData(data, address);
             parentId = _Database.AddNewRowAddressAndContent(address, title, newAddresses, parentId);
-
             if (++iteration > _Dept)
             {
                 _WorkingThreadsCount--;
                 return;
             }
-
             var threads = new List<Thread>();
             foreach (var newAddress in newAddresses)
             {
                 if (!newAddress.Contains(StartAddress))
                     continue;
-
                 if (FilterSite(newAddress))
                     continue;
-
                 _WorkingThreadMutex.WaitOne();
                 if (TakenSite.Contains(newAddress))
                 {
@@ -102,9 +97,7 @@ namespace HansWebCrawler
             SaveDataToFile(address, data);
             data = null;
             foreach (var thread in threads)
-            {
                 thread.Join();
-            }
             _WorkingThreadsCount--;
         }
 
@@ -123,9 +116,7 @@ namespace HansWebCrawler
         {
             var match = Regex.Match(data, "<title>(.*)</title>");
             if (match.Success)
-            {
                 return match.Groups[1].Value;
-            }
             return "";
         }
 
@@ -152,21 +143,22 @@ namespace HansWebCrawler
             {
                 var value = match.Groups[1].Value;
                 if (!value.StartsWith("http"))
+                {
+                    if (value.IndexOf('/') < 1)
+                        value = value.Remove(0, 1);
                     value = StartAddress + value;
+                }
                 addresses.Add(value);
-
                 var match2 = Regex.Match(match.Value, "title=\"(.*?)\"");
                 if (match2.Success)
                     addresses.Add(match2.Groups[1].Value);
                 else
                     addresses.Add("");
-
                 match2 = Regex.Match(match.Value, ">(.*?)</a>");
                 if (match2.Success)
                     addresses.Add(match2.Groups[1].Value);
                 else
                     addresses.Add("");
-
                 match = match.NextMatch();
             }
             return addresses;

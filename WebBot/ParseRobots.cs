@@ -14,7 +14,6 @@ namespace HansWebCrawler
             var webResposne = req.GetResponse();
             var webStream = webResposne.GetResponseStream();
             StreamReader webReader = new StreamReader(webStream);
-
             while (!webReader.EndOfStream)
             {
                 var data = webReader.ReadLine().ToLower();
@@ -39,6 +38,7 @@ namespace HansWebCrawler
             try
             {
                 var webStream = req.GetResponse().GetResponseStream();
+                webStream.WriteTimeout = 20000;
                 StreamReader webReader = new StreamReader(webStream);
                 while (!webReader.EndOfStream)
                 {

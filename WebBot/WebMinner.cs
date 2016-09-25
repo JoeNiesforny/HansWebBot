@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Cache;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -31,7 +32,7 @@ namespace HansWebCrawler
         static int _RequestTimeout = 0;
         static int _Dept = 1;
         static WebDataBase _Database;
-        static List<string> TakenSite;
+        static List<string> _TakenSite;
 
         public WebMinner(string address, int timeout = 200000)
         {
@@ -42,7 +43,7 @@ namespace HansWebCrawler
 
         public void Mining(int dept, int threadLimit = 100)
         {
-            TakenSite = new List<string>() { StartAddress };
+            _TakenSite = new List<string>() { StartAddress };
             LostSiteCount = 0;
             ThreadCount = 0;
             var iteration = 0;
@@ -53,6 +54,8 @@ namespace HansWebCrawler
             _Database = Database;
             BannedSite = ParseRobots.GetRobotsFile(StartAddress); // robots
             Mining(StartAddress, -1, iteration);
+            while (_WorkingThreadsCount != 0)
+                Thread.Sleep(100);
         }
 
         private static void Mining(string address, int parentId, int iteration)
@@ -66,15 +69,13 @@ namespace HansWebCrawler
                 return;
             }
             _Database.MarkAddressAsVisited(address);
-            var title = GetSiteTitleFromData(data);
             var newAddresses = GetAllAddressesWithContentFromData(data, address);
-            parentId = _Database.AddNewRowAddressAndContent(address, title, newAddresses, parentId);
+            parentId = _Database.AddNewRowAddressAndContent(address, GetSiteTitleFromData(data), newAddresses, parentId);
             if (++iteration > _Dept)
             {
                 _WorkingThreadsCount--;
                 return;
             }
-            var threads = new List<Thread>();
             foreach (var newAddress in newAddresses)
             {
                 if (!newAddress.Contains(StartAddress))
@@ -82,22 +83,18 @@ namespace HansWebCrawler
                 if (FilterSite(newAddress))
                     continue;
                 _WorkingThreadMutex.WaitOne();
-                if (TakenSite.Contains(newAddress))
+                if (_TakenSite.Contains(newAddress))
                 {
                     _WorkingThreadMutex.ReleaseMutex();
                     continue;
                 }
-                TakenSite.Add(newAddress);
+                _TakenSite.Add(newAddress);
                 while (_WorkingThreadsCount > _MaxThread) ; // wait for lowering the limit
-                var thread = new Thread(() => Mining(newAddress, parentId, iteration));
-                thread.Start();
+                new Thread(() => Mining(newAddress, parentId, iteration)).Start();
                 _WorkingThreadMutex.ReleaseMutex();
-                threads.Add(thread);
             }
             SaveDataToFile(address, data);
             data = null;
-            foreach (var thread in threads)
-                thread.Join();
             _WorkingThreadsCount--;
         }
 
@@ -171,10 +168,10 @@ namespace HansWebCrawler
             req.UseDefaultCredentials = true;
             try
             {
-                var webResposne = req.GetResponse();
-                var webStream = webResposne.GetResponseStream();
-                StreamReader webReader = new StreamReader(webStream);
-                return webReader.ReadToEnd();
+                using (var webResposne = req.GetResponse())
+                    using (var webStream = webResposne.GetResponseStream())
+                        using (StreamReader webReader = new StreamReader(webStream))
+                            return webReader.ReadToEnd();
             }
             catch (WebException err)
             {
@@ -186,7 +183,14 @@ namespace HansWebCrawler
 
         private static void SaveDataToFile(string address, string data)
         {
-            Directory.CreateDirectory(address.Substring(7));
+            var limitLength = Directory.GetCurrentDirectory().Length;
+            string newPath = address.Substring(7);
+            // For Windows filesystem there is a limit for a number of characters in path name to 248.
+            if (newPath.Length > (247 - limitLength))
+                newPath = newPath.Substring(0, 246 - limitLength);
+            foreach (var illegalCharacter in Path.GetInvalidFileNameChars())
+                    newPath.Replace(illegalCharacter, ';');
+            Directory.CreateDirectory(newPath);
             // ToDo - compute data or clean it from trash and leave only text.
             data = Regex.Replace(data, "(<(.*?)<body (.*?)>)", "");
             data = Regex.Replace(data, "(<script.*?</script>)", "");
@@ -194,7 +198,7 @@ namespace HansWebCrawler
             data = Regex.Replace(data, "(<.*?>)", "");
             data = data.Replace("&nbsp;", " ");
             data = Regex.Replace(data, "( {2,})", "\n");
-            File.WriteAllLines(address.Substring(7) + "/data", new string[] { data });
+            File.WriteAllLines(newPath + "/txt", new string[] { data });
         }
     }
 }
